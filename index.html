@@ -4,13 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>WorkerSaathi</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: sans-serif; margin: 0; background: #f4f7fb; text-align: center; }
-    header { background: #1d4ed8; color: white; padding: 40px 16px; }
+    header { background: #1d4ed8; color: white; padding: 32px 16px; }
     h1 { margin: 0; font-size: 28px; }
-    p { margin: 8px 0 0; font-size: 18px; }
-    main { padding: 32px 16px; }
-    button { background: #16a34a; color: white; border: none; padding: 14px 28px; font-size: 18px; border-radius: 10px; }
+    header p { margin: 8px 0 0; font-size: 18px; }
+    main { padding: 24px 16px; }
+    .card { background: white; max-width: 380px; margin: 0 auto; padding: 20px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+    input { width: 100%; box-sizing: border-box; padding: 14px; margin: 8px 0; font-size: 16px; border: 1px solid #ccc; border-radius: 10px; }
+    button { width: 100%; padding: 14px; margin-top: 8px; font-size: 18px; color: white; background: #16a34a; border: none; border-radius: 10px; }
+    button.alt { background: #1d4ed8; }
+    .hidden { display: none; }
+    #msg { margin-top: 16px; font-size: 16px; color: #b91c1c; }
   </style>
 </head>
 <body>
@@ -19,7 +25,69 @@
     <p>Har Worker Ka Digital Saathi</p>
   </header>
   <main>
-    <button>लॉगिन (जल्द आ रहा है)</button>
+    <div id="loginBox" class="card">
+      <h2>लॉगिन / साइन-अप</h2>
+      <input id="email" type="email" placeholder="ईमेल" autocomplete="email">
+      <input id="password" type="password" placeholder="पासवर्ड (कम से कम 6 अक्षर)" autocomplete="current-password">
+      <button id="loginBtn">लॉगिन</button>
+      <button id="signupBtn" class="alt">नया खाता बनाएँ</button>
+    </div>
+    <div id="homeBox" class="card hidden">
+      <h2>स्वागत है! 🎉</h2>
+      <p id="who"></p>
+      <button id="logoutBtn" class="alt">लॉगआउट</button>
+    </div>
+    <p id="msg"></p>
   </main>
+  <script>
+    const SUPABASE_URL = "https://kjnhysjxevhkkfuxhdlt.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_ewwFwAl3efWNQCKLSdi25A_MXigM03M";
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const msg = document.getElementById("msg");
+    const loginBox = document.getElementById("loginBox");
+    const homeBox = document.getElementById("homeBox");
+
+    function show(session) {
+      if (session) {
+        loginBox.classList.add("hidden");
+        homeBox.classList.remove("hidden");
+        document.getElementById("who").textContent = session.user.email;
+      } else {
+        homeBox.classList.add("hidden");
+        loginBox.classList.remove("hidden");
+      }
+    }
+
+    document.getElementById("signupBtn").onclick = async () => {
+      msg.style.color = "#b91c1c";
+      msg.textContent = "कृपया रुकिए...";
+      const { error } = await sb.auth.signUp({
+        email: document.getElementById("email").value.trim(),
+        password: document.getElementById("password").value
+      });
+      if (error) { msg.textContent = "गलती: " + error.message; return; }
+      msg.style.color = "#15803d";
+      msg.textContent = "खाता बन गया! अपने ईमेल में आया लिंक खोलकर पुष्टि करें, फिर लॉगिन करें।";
+    };
+
+    document.getElementById("loginBtn").onclick = async () => {
+      msg.style.color = "#b91c1c";
+      msg.textContent = "कृपया रुकिए...";
+      const { error } = await sb.auth.signInWithPassword({
+        email: document.getElementById("email").value.trim(),
+        password: document.getElementById("password").value
+      });
+      if (error) { msg.textContent = "गलती: " + error.message; return; }
+      msg.textContent = "";
+    };
+
+    document.getElementById("logoutBtn").onclick = async () => {
+      await sb.auth.signOut();
+    };
+
+    sb.auth.getSession().then(({ data }) => show(data.session));
+    sb.auth.onAuthStateChange((_event, session) => show(session));
+  </script>
 </body>
 </html>
