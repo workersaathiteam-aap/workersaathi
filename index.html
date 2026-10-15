@@ -1,93 +1,318 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>WorkerSaathi</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body { font-family: sans-serif; margin: 0; background: #f4f7fb; text-align: center; }
-    header { background: #1d4ed8; color: white; padding: 32px 16px; }
-    h1 { margin: 0; font-size: 28px; }
-    header p { margin: 8px 0 0; font-size: 18px; }
-    main { padding: 24px 16px; }
-    .card { background: white; max-width: 380px; margin: 0 auto; padding: 20px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
-    input { width: 100%; box-sizing: border-box; padding: 14px; margin: 8px 0; font-size: 16px; border: 1px solid #ccc; border-radius: 10px; }
-    button { width: 100%; padding: 14px; margin-top: 8px; font-size: 18px; color: white; background: #16a34a; border: none; border-radius: 10px; }
-    button.alt { background: #1d4ed8; }
-    .hidden { display: none; }
-    #msg { margin-top: 16px; font-size: 16px; color: #b91c1c; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WorkerSaathi</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body { font-family: sans-serif; margin: 0; background: #f4f7fb; color: #111; }
+header { background: #1d4ed8; color: white; padding: 24px 16px; text-align: center; }
+h1 { margin: 0; font-size: 26px; }
+header p { margin: 6px 0 0; font-size: 16px; }
+main { padding: 16px; max-width: 480px; margin: 0 auto; }
+.card { background: white; padding: 16px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.1); margin-bottom: 16px; }
+h2 { margin: 0 0 12px; font-size: 20px; }
+label { display: block; margin-top: 10px; font-size: 15px; font-weight: bold; }
+input, select, textarea { width: 100%; box-sizing: border-box; padding: 14px; margin-top: 6px; font-size: 16px; border: 1px solid #ccc; border-radius: 10px; background: white; }
+button { width: 100%; padding: 14px; margin-top: 10px; font-size: 18px; color: white; background: #16a34a; border: none; border-radius: 10px; }
+button.alt { background: #1d4ed8; }
+button.danger { background: #dc2626; }
+button.small { width: auto; padding: 10px 16px; font-size: 16px; margin-top: 8px; margin-right: 8px; }
+.hidden { display: none; }
+.msg { margin: 8px 0; font-size: 16px; color: #b91c1c; min-height: 20px; }
+.msg.ok { color: #15803d; }
+.row { border-top: 1px solid #e5e7eb; padding: 12px 0; }
+.row b { font-size: 17px; }
+.row div { font-size: 15px; margin-top: 2px; }
+.sum { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sum div { background: #eef2ff; border-radius: 10px; padding: 10px; font-size: 15px; text-align: center; }
+.sum div b { display: block; font-size: 20px; }
+.center { text-align: center; }
+</style>
 </head>
 <body>
-  <header>
-    <h1>WorkerSaathi</h1>
-    <p>Har Worker Ka Digital Saathi</p>
-  </header>
-  <main>
-    <div id="loginBox" class="card">
-      <h2>लॉगिन / साइन-अप</h2>
-      <input id="email" type="email" placeholder="ईमेल" autocomplete="email">
-      <input id="password" type="password" placeholder="पासवर्ड (कम से कम 6 अक्षर)" autocomplete="current-password">
-      <button id="loginBtn">लॉगिन</button>
-      <button id="signupBtn" class="alt">नया खाता बनाएँ</button>
-    </div>
-    <div id="homeBox" class="card hidden">
-      <h2>स्वागत है! 🎉</h2>
-      <p id="who"></p>
-      <button id="logoutBtn" class="alt">लॉगआउट</button>
-    </div>
-    <p id="msg"></p>
-  </main>
-  <script>
-    const SUPABASE_URL = "https://kjnhysjxevhkkfuxhdlt.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_ewwFwAl3efWNQCKLSdi25A_MXigM03M";
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<header>
+<h1>WorkerSaathi</h1>
+<p>Har Worker Ka Digital Saathi</p>
+</header>
+<main>
 
-    const msg = document.getElementById("msg");
-    const loginBox = document.getElementById("loginBox");
-    const homeBox = document.getElementById("homeBox");
+<div id="loginBox" class="card center">
+<h2>लॉगिन / साइन-अप</h2>
+<input id="email" type="email" placeholder="ईमेल" autocomplete="email">
+<input id="password" type="password" placeholder="पासवर्ड (कम से कम 8 अक्षर)" autocomplete="current-password">
+<button id="loginBtn">लॉगिन</button>
+<button id="signupBtn" class="alt">नया खाता बनाएँ</button>
+<p id="msg" class="msg"></p>
+</div>
 
-    function show(session) {
-      if (session) {
-        loginBox.classList.add("hidden");
-        homeBox.classList.remove("hidden");
-        document.getElementById("who").textContent = session.user.email;
-      } else {
-        homeBox.classList.add("hidden");
-        loginBox.classList.remove("hidden");
-      }
+<div id="homeBox" class="hidden">
+<div class="card center">
+<h2>स्वागत है! 🎉</h2>
+<p id="who"></p>
+<button id="logoutBtn" class="alt">लॉगआउट</button>
+</div>
+
+<div class="card">
+<h2 id="formTitle">हाज़िरी जोड़ें</h2>
+<label for="workDate">तारीख</label>
+<input id="workDate" type="date">
+<label for="status">स्थिति</label>
+<select id="status"></select>
+<label for="overtime">ओवरटाइम (घंटे)</label>
+<input id="overtime" type="number" min="0" max="24" step="0.5" value="0" inputmode="decimal">
+<label for="note">नोट (वैकल्पिक)</label>
+<textarea id="note" rows="2" maxlength="500"></textarea>
+<button id="saveBtn">सेव करें</button>
+<button id="cancelBtn" class="alt hidden">रद्द करें</button>
+<p id="appMsg" class="msg"></p>
+</div>
+
+<div class="card">
+<h2>महीने का हिसाब</h2>
+<label for="month">महीना चुनें</label>
+<input id="month" type="month">
+<div id="summary" class="sum" style="margin-top:12px"></div>
+</div>
+
+<div class="card">
+<h2>हाज़िरी की सूची</h2>
+<div id="list"></div>
+</div>
+</div>
+
+</main>
+<script>
+const SUPABASE_URL = "https://kjnhysjxevhkkfuxhdlt.supabase.co";
+const SUPABASE_KEY = "sb_publishable_ewwFwAl3efWNQCKLSdi25A_MXigM03M";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const STATUS = {
+  present: "हाज़िर",
+  absent: "गैर-हाज़िर",
+  half_day: "आधा दिन",
+  paid_leave: "सवेतन छुट्टी",
+  unpaid_leave: "बिना वेतन छुट्टी",
+  weekly_off: "साप्ताहिक छुट्टी",
+  public_holiday: "सार्वजनिक छुट्टी"
+};
+
+const $ = (id) => document.getElementById(id);
+let editingId = null;
+let records = [];
+
+function pad(n) { return String(n).padStart(2, "0"); }
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+}
+function setMsg(el, text, ok) {
+  el.textContent = text;
+  el.className = ok ? "msg ok" : "msg";
+}
+
+for (const key in STATUS) {
+  const o = document.createElement("option");
+  o.value = key;
+  o.textContent = STATUS[key];
+  $("status").appendChild(o);
+}
+$("workDate").value = todayStr();
+$("month").value = todayStr().slice(0, 7);
+
+function show(session) {
+  if (session) {
+    $("loginBox").classList.add("hidden");
+    $("homeBox").classList.remove("hidden");
+    $("who").textContent = session.user.email;
+    loadMonth();
+  } else {
+    $("homeBox").classList.add("hidden");
+    $("loginBox").classList.remove("hidden");
+    records = [];
+  }
+}
+
+$("signupBtn").onclick = async () => {
+  setMsg($("msg"), "कृपया रुकिए...", false);
+  const { error } = await sb.auth.signUp({
+    email: $("email").value.trim(),
+    password: $("password").value
+  });
+  if (error) { setMsg($("msg"), "गलती: " + error.message, false); return; }
+  setMsg($("msg"), "खाता बन गया! ईमेल में आया लिंक खोलकर पुष्टि करें, फिर लॉगिन करें।", true);
+};
+
+$("loginBtn").onclick = async () => {
+  setMsg($("msg"), "कृपया रुकिए...", false);
+  const { error } = await sb.auth.signInWithPassword({
+    email: $("email").value.trim(),
+    password: $("password").value
+  });
+  if (error) { setMsg($("msg"), "गलती: " + error.message, false); return; }
+  setMsg($("msg"), "", false);
+};
+
+$("logoutBtn").onclick = async () => { await sb.auth.signOut(); };
+
+function monthRange() {
+  const v = $("month").value || todayStr().slice(0, 7);
+  const y = parseInt(v.slice(0, 4), 10);
+  const m = parseInt(v.slice(5, 7), 10);
+  const ny = m === 12 ? y + 1 : y;
+  const nm = m === 12 ? 1 : m + 1;
+  return { start: v + "-01", end: ny + "-" + pad(nm) + "-01" };
+}
+
+async function loadMonth() {
+  const r = monthRange();
+  const { data, error } = await sb
+    .from("attendance")
+    .select("*")
+    .gte("work_date", r.start)
+    .lt("work_date", r.end)
+    .order("work_date", { ascending: false });
+  if (error) { setMsg($("appMsg"), "सूची नहीं मिली: " + error.message, false); return; }
+  records = data || [];
+  renderList();
+  renderSummary();
+}
+
+function renderSummary() {
+  const box = $("summary");
+  box.textContent = "";
+  const counts = {};
+  let ot = 0;
+  records.forEach((x) => {
+    counts[x.status] = (counts[x.status] || 0) + 1;
+    ot += Number(x.overtime_hours) || 0;
+  });
+  const items = [["कुल दर्ज दिन", records.length]];
+  for (const key in STATUS) {
+    if (counts[key]) items.push([STATUS[key], counts[key]]);
+  }
+  items.push(["कुल ओवरटाइम (घंटे)", ot]);
+  items.forEach((it) => {
+    const d = document.createElement("div");
+    const b = document.createElement("b");
+    b.textContent = it[1];
+    d.appendChild(b);
+    d.appendChild(document.createTextNode(it[0]));
+    box.appendChild(d);
+  });
+}
+
+function renderList() {
+  const list = $("list");
+  list.textContent = "";
+  if (records.length === 0) {
+    const p = document.createElement("p");
+    p.textContent = "इस महीने की कोई हाज़िरी दर्ज नहीं है।";
+    list.appendChild(p);
+    return;
+  }
+  records.forEach((x) => {
+    const row = document.createElement("div");
+    row.className = "row";
+    const b = document.createElement("b");
+    b.textContent = x.work_date + " — " + (STATUS[x.status] || x.status);
+    row.appendChild(b);
+    if (Number(x.overtime_hours) > 0) {
+      const o = document.createElement("div");
+      o.textContent = "ओवरटाइम: " + x.overtime_hours + " घंटे";
+      row.appendChild(o);
     }
+    if (x.note) {
+      const n = document.createElement("div");
+      n.textContent = "नोट: " + x.note;
+      row.appendChild(n);
+    }
+    const e = document.createElement("button");
+    e.className = "small alt";
+    e.textContent = "बदलें";
+    e.onclick = () => startEdit(x);
+    const d = document.createElement("button");
+    d.className = "small danger";
+    d.textContent = "हटाएँ";
+    d.onclick = () => removeRecord(x);
+    row.appendChild(e);
+    row.appendChild(d);
+    list.appendChild(row);
+  });
+}
 
-    document.getElementById("signupBtn").onclick = async () => {
-      msg.style.color = "#b91c1c";
-      msg.textContent = "कृपया रुकिए...";
-      const { error } = await sb.auth.signUp({
-        email: document.getElementById("email").value.trim(),
-        password: document.getElementById("password").value
-      });
-      if (error) { msg.textContent = "गलती: " + error.message; return; }
-      msg.style.color = "#15803d";
-      msg.textContent = "खाता बन गया! अपने ईमेल में आया लिंक खोलकर पुष्टि करें, फिर लॉगिन करें।";
-    };
+function resetForm() {
+  editingId = null;
+  $("formTitle").textContent = "हाज़िरी जोड़ें";
+  $("workDate").value = todayStr();
+  $("status").value = "present";
+  $("overtime").value = "0";
+  $("note").value = "";
+  $("cancelBtn").classList.add("hidden");
+}
 
-    document.getElementById("loginBtn").onclick = async () => {
-      msg.style.color = "#b91c1c";
-      msg.textContent = "कृपया रुकिए...";
-      const { error } = await sb.auth.signInWithPassword({
-        email: document.getElementById("email").value.trim(),
-        password: document.getElementById("password").value
-      });
-      if (error) { msg.textContent = "गलती: " + error.message; return; }
-      msg.textContent = "";
-    };
+function startEdit(x) {
+  editingId = x.id;
+  $("formTitle").textContent = "हाज़िरी बदलें";
+  $("workDate").value = x.work_date;
+  $("status").value = x.status;
+  $("overtime").value = x.overtime_hours;
+  $("note").value = x.note || "";
+  $("cancelBtn").classList.remove("hidden");
+  setMsg($("appMsg"), "", false);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
 
-    document.getElementById("logoutBtn").onclick = async () => {
-      await sb.auth.signOut();
-    };
+$("cancelBtn").onclick = () => { resetForm(); setMsg($("appMsg"), "", false); };
 
-    sb.auth.getSession().then(({ data }) => show(data.session));
-    sb.auth.onAuthStateChange((_event, session) => show(session));
-  </script>
+$("saveBtn").onclick = async () => {
+  const workDate = $("workDate").value;
+  const ot = parseFloat($("overtime").value || "0");
+  if (!workDate) { setMsg($("appMsg"), "कृपया तारीख चुनें।", false); return; }
+  if (isNaN(ot) || ot < 0 || ot > 24) { setMsg($("appMsg"), "ओवरटाइम 0 से 24 घंटे के बीच होना चाहिए।", false); return; }
+  const payload = {
+    work_date: workDate,
+    status: $("status").value,
+    overtime_hours: ot,
+    note: $("note").value.trim() || null
+  };
+  setMsg($("appMsg"), "सेव हो रहा है...", false);
+  let error;
+  if (editingId) {
+    payload.updated_at = new Date().toISOString();
+    ({ error } = await sb.from("attendance").update(payload).eq("id", editingId));
+  } else {
+    ({ error } = await sb.from("attendance").insert(payload));
+  }
+  if (error) {
+    if (error.code === "23505") {
+      setMsg($("appMsg"), "इस तारीख की हाज़िरी पहले से दर्ज है। सूची में उसे 'बदलें' दबाकर सुधारें।", false);
+    } else {
+      setMsg($("appMsg"), "गलती: " + error.message, false);
+    }
+    return;
+  }
+  const savedMonth = workDate.slice(0, 7);
+  resetForm();
+  $("month").value = savedMonth;
+  setMsg($("appMsg"), "सेव हो गया ✅", true);
+  loadMonth();
+};
+
+async function removeRecord(x) {
+  if (!confirm(x.work_date + " की हाज़िरी हटानी है? यह वापस नहीं आएगी।")) return;
+  const { error } = await sb.from("attendance").delete().eq("id", x.id);
+  if (error) { setMsg($("appMsg"), "गलती: " + error.message, false); return; }
+  if (editingId === x.id) resetForm();
+  setMsg($("appMsg"), "हटा दी गई।", true);
+  loadMonth();
+}
+
+$("month").onchange = loadMonth;
+
+sb.auth.getSession().then(({ data }) => show(data.session));
+sb.auth.onAuthStateChange((_event, session) => show(session));
+</script>
 </body>
 </html>
