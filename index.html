@@ -102,7 +102,8 @@ const $ = (id) => document.getElementById(id);
 let editingId = null;
 let records = [];
 
-function pad(n) { return String(n).padStart(2, "0"); }
+function pad(n) { return String(n).padStart(2, "0"); } const DAYS = ["रविवार","सोमवार","मंगलवार","बुधवार","गुरुवार","शुक्रवार","शनिवार"];
+function dayName(s) { const p = s.split("-"); return DAYS[new Date(+p[0], +p[1] - 1, +p[2]).getDay()]; }
 function todayStr() {
   const d = new Date();
   return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
@@ -216,7 +217,7 @@ function renderList() {
     const row = document.createElement("div");
     row.className = "row";
     const b = document.createElement("b");
-    b.textContent = x.work_date + " — " + (STATUS[x.status] || x.status);
+    b.textContent = x.work_date + " (" + dayName(x.work_date) + ") — " + (STATUS[x.status] || x.status);
     row.appendChild(b);
     if (Number(x.overtime_hours) > 0) {
       const o = document.createElement("div");
